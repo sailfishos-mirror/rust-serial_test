@@ -1,8 +1,9 @@
 use crate::rwlock::{Locks, MutexGuardWrapper};
 use once_cell::sync::OnceCell;
-use std::collections::HashMap;
-use std::sync::atomic::AtomicU32;
-use std::sync::Mutex;
+use std::{
+    collections::HashMap,
+    sync::{atomic::AtomicU32, Mutex},
+};
 
 pub(crate) struct ValueRef(UniqueReentrantMutex);
 
