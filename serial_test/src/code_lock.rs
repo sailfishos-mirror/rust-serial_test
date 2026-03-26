@@ -27,10 +27,6 @@ impl LockMap {
         self.inner.lock().unwrap().get(key).cloned().map(ValueRef)
     }
 
-    pub fn contains(&self, key: &str) -> bool {
-        self.inner.lock().unwrap().contains_key(key)
-    }
-
     fn get_or_insert(
         &self,
         key: &str,
@@ -155,12 +151,6 @@ impl UniqueReentrantMutex {
 }
 
 pub(crate) fn check_new_key(name: &str) {
-    // Check if a new key is needed. Just need a read lock, which can be done in sync with everyone else
-    if global_locks().contains(name) {
-        return;
-    };
-
-    // This is the rare path, which avoids the multi-writer situation mostly
     global_locks().get_or_insert(name, || UniqueReentrantMutex::new_mutex(name));
 }
 
