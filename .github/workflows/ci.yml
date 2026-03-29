@@ -75,7 +75,7 @@ jobs:
           components: miri
       - uses: Swatinem/rust-cache@v2.2.1
       - name: Miri strict provenance
-        run: cargo miri test -p serial_test --no-default-features --test tests
+        run: cargo miri test -p serial_test  --all-features
         env:
           MIRIFLAGS: -Zmiri-strict-provenance
 
