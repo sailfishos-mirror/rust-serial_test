@@ -38,19 +38,22 @@
 
 use log::info;
 use once_cell::sync::OnceCell;
-use scc::HashMap;
 #[cfg(test)]
 use serial_test::{parallel, serial};
 use std::{
+    collections::HashMap,
     convert::TryInto,
     env, fs,
     path::PathBuf,
-    sync::atomic::{AtomicUsize, Ordering},
+    sync::{
+        atomic::{AtomicUsize, Ordering},
+        Arc, Mutex,
+    },
     thread,
     time::Duration,
 };
 
-static LOCKS: OnceCell<HashMap<String, AtomicUsize>> = OnceCell::new();
+static LOCKS: OnceCell<Mutex<HashMap<String, Arc<AtomicUsize>>>> = OnceCell::new();
 
 fn init() {
     let _ = env_logger::builder().is_test(false).try_init();
@@ -58,11 +61,13 @@ fn init() {
 
 pub fn test_fn(key: &str, count: usize) {
     init();
-    let local_locks = LOCKS.get_or_init(HashMap::new);
-    let entry = local_locks
-        .entry(key.to_string())
-        .or_insert(AtomicUsize::new(0));
-    let local_lock = entry.get();
+    let local_locks = LOCKS.get_or_init(|| Mutex::new(HashMap::new()));
+    let local_lock = {
+        let mut map = local_locks.lock().unwrap();
+        map.entry(key.to_string())
+            .or_insert_with(|| Arc::new(AtomicUsize::new(0)))
+            .clone()
+    };
     info!("(non-fs) Start {}", count);
     local_lock.store(count, Ordering::Relaxed);
     thread::sleep(Duration::from_millis(1000 * (count as u64)));

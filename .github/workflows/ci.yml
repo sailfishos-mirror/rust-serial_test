@@ -5,6 +5,7 @@ on:
   pull_request:
   schedule:
     - cron: '0 0 1 * *'
+  workflow_dispatch:
 
 name: Continuous integration
 
@@ -63,6 +64,21 @@ jobs:
         env:
           RUST_TEST_THREADS: 3 # So the parallel tests have enough threads
           RUST_LOG: debug
+
+  miri:
+    name: Miri
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3.5.0
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+          components: miri
+      - uses: Swatinem/rust-cache@v2.2.1
+      - name: Miri strict provenance
+        run: cargo miri test -p serial_test --all-features -- --skip file_lock
+        env:
+          MIRIFLAGS: -Zmiri-strict-provenance
 
   minimal-versions:
     name: minimal versions check

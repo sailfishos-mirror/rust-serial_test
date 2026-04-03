@@ -16,7 +16,6 @@ lock_api = { version="^0.4.7", default-features = false }
 wasm-bindgen-test = {version="^0.3.50", optional=true, default-features = false, features=["std"] }
 scoped-tls = { version="1", optional=true, default-features = false }
 log = { version = ">=0.4.4" , default-features = false }
-scc = { version = "2", default-features = false}
 
 [dev-dependencies]
 tokio = { version = "=1.38.2", features = ["macros", "rt", "rt-multi-thread"], default-features = false }
